@@ -76,7 +76,8 @@ jobs:
       - name: Mock Kubectl Authentication
         run: |
           echo "Would run: gcloud container clusters get-credentials [CLUSTER_NAME] --zone europe-west1-d --project ${{ needs.extract-context.outputs.project_id }}"
-          
+          echo "Current files in the working directory:"
+          ls -la
       - name: Mock Skaffold Deploy
         run: |
           echo "Would run skaffold deploy in directory: $(pwd)"
