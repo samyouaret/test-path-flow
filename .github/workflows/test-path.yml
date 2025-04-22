@@ -45,6 +45,12 @@ jobs:
           echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
           echo "working_directory=$WORKING_DIR" >> $GITHUB_OUTPUT
           echo "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUT
+      - name: Print Values for this job
+        run: |
+          echo "env: ${{ steps.set-vars.outputs.env }}"
+          echo "project_id: ${{ steps.set-vars.outputs.project_id }}"
+          echo "working_directory: ${{ steps.set-vars.outputs.working_directory }}"
+          echo "service_account: ${{ steps.set-vars.outputs.service_account }}"
 
   mock-deploy:
     needs: extract-context
