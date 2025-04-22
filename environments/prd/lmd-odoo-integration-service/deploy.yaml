@@ -1,0 +1,7 @@
+version: 1
+id: lmd-odoo-integration-service-prd
+name: Test
+type: integration Service production
+description: Test environment for LMD Odoo Integration Service
+tags:
+  - prd
