@@ -26,7 +26,7 @@ jobs:
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }} | grep -E "environments/.*/lmd-odoo-integration-service/deploy\.ya?ml")
           echo "Changed files: $CHANGED_FILES"
           FIRST_FILE=$(echo "$CHANGED_FILES" | head -n 1)
-          echo "First file: $FIRST_FILE"
+          echo "Working only on First file: $FIRST_FILE"
           echo "file=$FIRST_FILE" >> $GITHUB_OUTPUT
 
       - name: Extract env from path
