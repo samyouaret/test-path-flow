@@ -1,0 +1,80 @@
+name: mock-deploy-B2B-test
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'environments/**/lmd-odoo-integration-service/deploy.yaml'
+      - 'environments/**/lmd-odoo-integration-service/deploy.yml'
+jobs:
+  extract-context:
+    runs-on: ubuntu-latest
+    outputs:
+      env: ${{ steps.set-vars.outputs.env }}
+      project_id: ${{ steps.set-vars.outputs.project_id }}
+      working_directory: ${{ steps.set-vars.outputs.working_directory }}
+      service_account: ${{ steps.set-vars.outputs.service_account }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }} | grep -E "environments/.*/lmd-inventorymanagement-odoo-b2b/lmd-inventorymanagement-odoo-b2b-service\.ya?ml")
+          echo "Changed files: $CHANGED_FILES"
+          FIRST_FILE=$(echo "$CHANGED_FILES" | head -n 1)
+          echo "Working only on First file: $FIRST_FILE"
+          echo "file=$FIRST_FILE" >> $GITHUB_OUTPUT
+
+      - name: Extract env from path
+        id: set-vars
+        run: |
+          FILE="${{ steps.changed-files.outputs.file }}"
+          echo "File used for reference: $FILE"
+          
+          # Extract environment from the path
+          ENV=$(echo "$FILE" | cut -d'/' -f2)
+          WORKING_DIR=$(dirname "$FILE")
+          PROJECT_ID="ysr-lmd-odoo-$ENV"
+          SERVICE_ACCOUNT="${PROJECT_ID}-sa@${PROJECT_ID}.iam.gserviceaccount.com"
+          
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+          echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
+          echo "working_directory=$WORKING_DIR" >> $GITHUB_OUTPUT
+          echo "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUT
+
+  mock-deploy:
+    needs: extract-context
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ needs.extract-context.outputs.working_directory }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Mock Approve Pull Request
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Would approve PR ${{ github.event.pull_request.number }}"
+          
+      - name: Mock Auth
+        run: |
+          echo "Would authenticate with:"
+          echo "Project ID: ${{ needs.extract-context.outputs.project_id }}"
+          echo "Service Account: ${{ needs.extract-context.outputs.service_account }}"
+          
+      - name: Mock Kubectl Authentication
+        run: |
+          echo "Would run: gcloud container clusters get-credentials [CLUSTER_NAME] --zone europe-west1-d --project ${{ needs.extract-context.outputs.project_id }}"
+          
+      - name: Mock Skaffold Deploy
+        run: |
+          echo "Would run skaffold deploy in directory: $(pwd)"
+          echo "ENV: ${{ needs.extract-context.outputs.env }}"
+          echo "PROJECT_ID: ${{ needs.extract-context.outputs.project_id }}"
+          echo "WORKING_DIR: ${{ needs.extract-context.outputs.working_directory }}"
+          echo "SERVICE_ACCOUNT: ${{ needs.extract-context.outputs.service_account }}"
