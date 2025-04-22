@@ -25,17 +25,22 @@ jobs:
           git fetch origin ${{ github.base_ref }}
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }} | grep -E "environments/.*/lmd-odoo-integration-service/deploy\.ya?ml")
           echo "Changed files: $CHANGED_FILES"
-          echo "files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+          FIRST_FILE=$(echo "$CHANGED_FILES" | head -n 1)
+          echo "First file: $FIRST_FILE"
+          echo "file=$FIRST_FILE" >> $GITHUB_OUTPUT
 
       - name: Extract env from path
         id: set-vars
         run: |
-          FILE=$(echo "${{ steps.changed-files.outputs.files }}" | head -n 1)
-          echo "File detected: $FILE"
+          FILE="${{ steps.changed-files.outputs.file }}"
+          echo "File used for reference: $FILE"
+          
+          # Extract environment from the path
           ENV=$(echo "$FILE" | cut -d'/' -f2)
           WORKING_DIR=$(dirname "$FILE")
           PROJECT_ID="ysr-lmd-odoo-$ENV"
           SERVICE_ACCOUNT="${PROJECT_ID}-sa@${PROJECT_ID}.iam.gserviceaccount.com"
+          
           echo "env=$ENV" >> $GITHUB_OUTPUT
           echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
           echo "working_directory=$WORKING_DIR" >> $GITHUB_OUTPUT
