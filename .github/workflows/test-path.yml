@@ -1,12 +1,10 @@
 name: mock-deploy-lmd-integration
-
 on:
   pull_request:
     branches: [main]
     paths:
-      - environments/**/lmd-odoo-integration-service/deploy.yaml
-      - environments/**/lmd-odoo-integration-service/deploy.yml
-
+      - 'environments/**/lmd-odoo-integration-service/deploy.yaml'
+      - 'environments/**/lmd-odoo-integration-service/deploy.yml'
 jobs:
   extract-context:
     runs-on: ubuntu-latest
@@ -16,24 +14,32 @@ jobs:
       working_directory: ${{ steps.set-vars.outputs.working_directory }}
       service_account: ${{ steps.set-vars.outputs.service_account }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }} | grep -E "environments/.*/lmd-odoo-integration-service/deploy\.ya?ml")
+          echo "Changed files: $CHANGED_FILES"
+          echo "files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+
       - name: Extract env from path
         id: set-vars
         run: |
-          FILE=$(git diff --name-only main ${{ github.sha }} | grep 'environments/.*/lmd-odoo-integration-service/deploy.yaml' | head -n 1)
-          echo "Detected changed file: $FILE"
-
-          IFS='/' read -ra PARTS <<< "$FILE"
-          ENV="${PARTS[1]}"
+          FILE=$(echo "${{ steps.changed-files.outputs.files }}" | head -n 1)
+          echo "File detected: $FILE"
+          ENV=$(echo "$FILE" | cut -d'/' -f2)
           WORKING_DIR=$(dirname "$FILE")
           PROJECT_ID="ysr-lmd-odoo-$ENV"
           SERVICE_ACCOUNT="${PROJECT_ID}-sa@${PROJECT_ID}.iam.gserviceaccount.com"
-
           echo "env=$ENV" >> $GITHUB_OUTPUT
           echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
           echo "working_directory=$WORKING_DIR" >> $GITHUB_OUTPUT
-          echo "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUTecho "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUT
+          echo "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUT
 
   mock-deploy:
     needs: extract-context
@@ -42,6 +48,9 @@ jobs:
       run:
         working-directory: ${{ needs.extract-context.outputs.working_directory }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
       - name: Print Values
         run: |
           echo "ENV: ${{ needs.extract-context.outputs.env }}"
