@@ -4,7 +4,8 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - environments/**/lmd-odoo-integration-service/*.{yml,yaml}
+      - environments/**/lmd-odoo-integration-service/deploy.yaml
+      - environments/**/lmd-odoo-integration-service/deploy.yml
 
 jobs:
   extract-context:
@@ -15,6 +16,12 @@ jobs:
       working_directory: ${{ steps.set-vars.outputs.working_directory }}
       service_account: ${{ steps.set-vars.outputs.service_account }}
     steps:
+      - name: Debug event paths
+        run: |
+          echo "All paths:"
+          echo "${{ toJson(github.event.paths) }}"
+          echo "First path:"
+          echo "${{ github.event.paths[0] }}"
       - name: Extract env from path
         id: set-vars
         run: |
