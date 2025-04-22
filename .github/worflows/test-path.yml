@@ -1,0 +1,44 @@
+name: mock-deploy-lmd-integration
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - environments/**/lmd-odoo-integration-service/*.{yml,yaml}
+
+jobs:
+  extract-context:
+    runs-on: ubuntu-latest
+    outputs:
+      env: ${{ steps.set-vars.outputs.env }}
+      project_id: ${{ steps.set-vars.outputs.project_id }}
+      working_directory: ${{ steps.set-vars.outputs.working_directory }}
+      service_account: ${{ steps.set-vars.outputs.service_account }}
+    steps:
+      - name: Extract env from path
+        id: set-vars
+        run: |
+          FILE="${{ github.event.paths[0] }}"
+          ENV=$(echo "$FILE" | cut -d'/' -f2)
+          WORKING_DIR=$(dirname "$FILE")
+          PROJECT_ID="ysr-lmd-odoo-$ENV"
+          SERVICE_ACCOUNT="${PROJECT_ID}-sa@${PROJECT_ID}.iam.gserviceaccount.com"
+
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+          echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
+          echo "working_directory=$WORKING_DIR" >> $GITHUB_OUTPUT
+          echo "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUT
+
+  mock-deploy:
+    needs: extract-context
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ needs.extract-context.outputs.working_directory }}
+    steps:
+      - name: Print Values
+        run: |
+          echo "ENV: ${{ needs.extract-context.outputs.env }}"
+          echo "PROJECT_ID: ${{ needs.extract-context.outputs.project_id }}"
+          echo "WORKING_DIR: ${{ needs.extract-context.outputs.working_directory }}"
+          echo "SERVICE_ACCOUNT: ${{ needs.extract-context.outputs.service_account }}"
