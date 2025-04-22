@@ -1,5 +1,5 @@
 version: 1
 id: lmd-odoo-integration-service-stg
 name: Test
-type: integration
+type: integration and service
 description: Test environment for LMD Odoo Integration Service

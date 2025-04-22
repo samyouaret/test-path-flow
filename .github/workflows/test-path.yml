@@ -16,22 +16,24 @@ jobs:
       working_directory: ${{ steps.set-vars.outputs.working_directory }}
       service_account: ${{ steps.set-vars.outputs.service_account }}
     steps:
-          - name: Extract env from path
-            id: set-vars
-            run: |
-              FILE=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'environments/.*/lmd-odoo-integration-service/deploy.yaml' | head -n 1)
-              echo "Detected changed file: $FILE"
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Extract env from path
+        id: set-vars
+        run: |
+          FILE=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'environments/.*/lmd-odoo-integration-service/deploy.yaml' | head -n 1)
+          echo "Detected changed file: $FILE"
 
-              IFS='/' read -ra PARTS <<< "$FILE"
-              ENV="${PARTS[1]}"
-              WORKING_DIR=$(dirname "$FILE")
-              PROJECT_ID="ysr-lmd-odoo-$ENV"
-              SERVICE_ACCOUNT="${PROJECT_ID}-sa@${PROJECT_ID}.iam.gserviceaccount.com"
+          IFS='/' read -ra PARTS <<< "$FILE"
+          ENV="${PARTS[1]}"
+          WORKING_DIR=$(dirname "$FILE")
+          PROJECT_ID="ysr-lmd-odoo-$ENV"
+          SERVICE_ACCOUNT="${PROJECT_ID}-sa@${PROJECT_ID}.iam.gserviceaccount.com"
 
-              echo "env=$ENV" >> $GITHUB_OUTPUT
-              echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
-              echo "working_directory=$WORKING_DIR" >> $GITHUB_OUTPUT
-              echo "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUTecho "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUT
+          echo "env=$ENV" >> $GITHUB_OUTPUT
+          echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
+          echo "working_directory=$WORKING_DIR" >> $GITHUB_OUTPUT
+          echo "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUTecho "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUT
 
   mock-deploy:
     needs: extract-context
