@@ -4,7 +4,8 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - environments/**/lmd-odoo-integration-service/*.{yml,yaml}
+      - environments/**/lmd-odoo-integration-service/*.yaml
+      - environments/**/lmd-odoo-integration-service/*.yml
 
 jobs:
   extract-context:
