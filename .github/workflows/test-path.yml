@@ -21,7 +21,7 @@ jobs:
       - name: Extract env from path
         id: set-vars
         run: |
-          FILE=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'environments/.*/lmd-odoo-integration-service/deploy.yaml' | head -n 1)
+          FILE=$(git diff --name-only main ${{ github.sha }} | grep 'environments/.*/lmd-odoo-integration-service/deploy.yaml' | head -n 1)
           echo "Detected changed file: $FILE"
 
           IFS='/' read -ra PARTS <<< "$FILE"
