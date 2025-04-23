@@ -1,7 +1,7 @@
 name: mock-deploy-lmd-integration
 on:
   pull_request:
-    branches: [main]
+    branches: [test]
     paths:
       - 'environments/**/lmd-odoo-integration-service/deploy.yaml'
       - 'environments/**/lmd-odoo-integration-service/deploy.yml'
