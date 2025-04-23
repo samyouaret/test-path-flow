@@ -1,0 +1,115 @@
+name: Test Deploy Odoo Integration Service
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_branch:
+        description: 'Branch to test (main, staging, qa)'
+        required: true
+        default: 'main'
+    
+permissions:
+  contents: read
+
+jobs:
+  determine_environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+      image_prefix: ${{ steps.set-env.outputs.image_prefix }}
+      pr_emoji: ${{ steps.set-env.outputs.pr_emoji }}
+      pr_body_prefix: ${{ steps.set-env.outputs.pr_body_prefix }}
+      env_display_name: ${{ steps.set-env.outputs.env_display_name }}
+    steps:
+      - name: Set environment variables based on branch
+        id: set-env
+        run: |
+          if [[ "${{ github.event.inputs.test_branch }}" == "main" ]]; then
+            echo "environment=prd" >> $GITHUB_OUTPUT
+            echo "image_prefix=prd" >> $GITHUB_OUTPUT
+            echo "pr_emoji=:rocket:" >> $GITHUB_OUTPUT
+            echo "pr_body_prefix=" >> $GITHUB_OUTPUT
+            echo "env_display_name=PRODUCTION" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.inputs.test_branch }}" == "staging" ]]; then
+            echo "environment=stg" >> $GITHUB_OUTPUT
+            echo "image_prefix=staging" >> $GITHUB_OUTPUT
+            echo "pr_emoji=" >> $GITHUB_OUTPUT
+            echo "pr_body_prefix=Release IS-B2C staging" >> $GITHUB_OUTPUT
+            echo "env_display_name=STAGING" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.inputs.test_branch }}" == "qa" ]]; then
+            echo "environment=qa" >> $GITHUB_OUTPUT
+            echo "image_prefix=qa" >> $GITHUB_OUTPUT
+            echo "pr_emoji=" >> $GITHUB_OUTPUT
+            echo "pr_body_prefix=Release IS-B2C qa" >> $GITHUB_OUTPUT
+            echo "env_display_name=QA" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Echo environment variables
+        run: |
+          echo "Environment: ${{ steps.set-env.outputs.environment }}"
+          echo "Image Prefix: ${{ steps.set-env.outputs.image_prefix }}"
+          echo "PR Emoji: ${{ steps.set-env.outputs.pr_emoji }}"
+          echo "PR Body Prefix: ${{ steps.set-env.outputs.pr_body_prefix }}"
+          echo "Environment Display Name: ${{ steps.set-env.outputs.env_display_name }}"
+
+  build_integration_service:
+    runs-on: ubuntu-latest
+    needs: determine_environment
+    env:
+      MW_IMAGE_DOCKER_TAG: ${{ needs.determine_environment.outputs.image_prefix }}-v${{github.sha}}
+      PROJECT_ID: test-project-id
+    outputs:
+      odoo_is_image_tag: ${{ env.MW_IMAGE_DOCKER_TAG }}
+    steps:
+      - name: Echo environment
+        run: |
+         echo "Using environment: ${{ needs.determine_environment.outputs.environment }}"
+          
+      - name: Echo image tag
+        run: |
+         echo "Image tag: ${{ env.MW_IMAGE_DOCKER_TAG }}"
+      
+      - name: Mock Docker login
+        run: echo "Mock Docker login to Artifact Registry"
+          
+      - name: Mock Docker build and push
+        run: |
+          echo "Building Docker image with environment-specific variables"
+          echo "Docker image would be tagged as: europe-west1-docker.pkg.dev/${PROJECT_ID}/ysr-lmd-odoo-${{needs.determine_environment.outputs.environment}}-gcr/odoo-integration-svc:${{env.MW_IMAGE_DOCKER_TAG}}"
+
+  open-pr-on-ship-repo:
+    runs-on: ubuntu-latest
+    needs: [determine_environment, build_integration_service]
+    steps:
+      - name: Echo repository checkout
+        run: echo "Would checkout YAtechnologies/pi-lmd-odoo-ship repository"
+
+      - name: Echo deployment file update
+        run: |
+          echo "Would update deployment file: environments/${{ needs.determine_environment.outputs.environment }}/lmd-odoo-integration-service/lmd-odoo-integration-service.${{ needs.determine_environment.outputs.environment }}.yaml"
+          echo "Find and replace pattern would be:"
+          echo "  From: image: europe-west1-docker.pkg.dev/test-project-id/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}-gcr/odoo-integration-svc:${{ needs.determine_environment.outputs.image_prefix }}-*"
+          echo "  To:   image: europe-west1-docker.pkg.dev/test-project-id/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}-gcr/odoo-integration-svc:${{ needs.build_integration_service.outputs.odoo_is_image_tag }}"
+          
+      - name: Echo commit message
+        run: |
+          echo "Would commit with message: Updates IS-B2C image [${{ needs.determine_environment.outputs.env_display_name }}]"
+          
+      - name: Echo PR creation
+        run: |
+          echo "Would create PR with:"
+          echo "  Title: [B2C ${{ needs.determine_environment.outputs.env_display_name }}] - Test PR Title ${{ needs.determine_environment.outputs.pr_emoji }}"
+          echo "  Body: ${{ needs.determine_environment.outputs.pr_body_prefix }} https://github.com/YAtechnologies/pi-lmd-odoo-ship/commits/${{ github.sha }}"
+          
+      - name: Summary of all values
+        run: |
+          echo "==================== TEST SUMMARY ===================="
+          echo "Branch: ${{ github.event.inputs.test_branch }}"
+          echo "Environment: ${{ needs.determine_environment.outputs.environment }}"
+          echo "Image Prefix: ${{ needs.determine_environment.outputs.image_prefix }}"
+          echo "Full Image Tag: ${{ needs.build_integration_service.outputs.odoo_is_image_tag }}"
+          echo "Full Image URL: europe-west1-docker.pkg.dev/test-project-id/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}-gcr/odoo-integration-svc:${{ needs.build_integration_service.outputs.odoo_is_image_tag }}"
+          echo "PR Emoji: ${{ needs.determine_environment.outputs.pr_emoji }}"
+          echo "PR Body Prefix: ${{ needs.determine_environment.outputs.pr_body_prefix }}"
+          echo "Environment Display Name: ${{ needs.determine_environment.outputs.env_display_name }}"
+          echo "======================================================"
