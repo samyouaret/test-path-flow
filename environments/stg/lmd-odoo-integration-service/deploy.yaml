@@ -1,0 +1,9 @@
+version: 1
+id: lmd-odoo-integration-service-stg
+name: Test
+type: integration Service
+description: Test environment for LMD Odoo Integration Service
+tags:
+  - stg
+  - prd
+  - test
