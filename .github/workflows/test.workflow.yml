@@ -67,6 +67,9 @@ jobs:
       - name: Echo sample secret
         run: |
          echo "Sample secret: ${{ secrets.SAMPLE_SECRET }}"
+      - name: ECHO SAMPLE VAR
+        run: |
+         echo "Sample var: ${{ vars.SAMPLE_VAR }}"
       - name: Echo image tag
         run: |
          echo "Image tag: ${{ env.MW_IMAGE_DOCKER_TAG }}"
