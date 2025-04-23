@@ -1,2 +1,3 @@
 version: 2
 id: lmd-odoo-integration-service-prd
+name: Test
