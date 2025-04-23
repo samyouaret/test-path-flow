@@ -1,10 +1,18 @@
 name: mock-deploy-B2B-test
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'environments/**/lmd-odoo-integration-service/deploy.yaml'
+      - 'environments/**/lmd-odoo-integration-service/deploy.yml'
   pull_request:
     branches: [main]
     paths:
       - 'environments/**/lmd-odoo-integration-service/deploy.yaml'
       - 'environments/**/lmd-odoo-integration-service/deploy.yml'
+    paths-ignore:
+      - 'environments/prd'
 jobs:
   extract-context:
     runs-on: ubuntu-latest
