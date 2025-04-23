@@ -52,6 +52,7 @@ jobs:
           echo "Environment Display Name: ${{ steps.set-env.outputs.env_display_name }}"
 
   build_integration_service:
+    environment: ${{ needs.determine_environment.outputs.environment }}
     runs-on: ubuntu-latest
     needs: determine_environment
     env:
@@ -63,7 +64,9 @@ jobs:
       - name: Echo environment
         run: |
          echo "Using environment: ${{ needs.determine_environment.outputs.environment }}"
-          
+      - name: Echo sample secret
+        run: |
+         echo "Sample secret: ${{ secrets.SAMPLE_SECRET }}"
       - name: Echo image tag
         run: |
          echo "Image tag: ${{ env.MW_IMAGE_DOCKER_TAG }}"
