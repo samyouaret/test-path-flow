@@ -24,25 +24,24 @@ jobs:
       - name: Set environment variables based on branch
         id: set-env
         run: |
+          echo "pr_emoji=:rocket:" >> $GITHUB_OUTPUT
           if [[ "${{ github.event.inputs.test_branch }}" == "main" ]]; then
             echo "environment=prd" >> $GITHUB_OUTPUT
             echo "image_prefix=prd" >> $GITHUB_OUTPUT
-            echo "pr_emoji=:rocket:" >> $GITHUB_OUTPUT
-            echo "pr_body_prefix=" >> $GITHUB_OUTPUT
+            echo "pr_body_prefix=Release IS-B2C staging" >> $GITHUB_OUTPUT
             echo "env_display_name=PRODUCTION" >> $GITHUB_OUTPUT
           elif [[ "${{ github.event.inputs.test_branch }}" == "staging" ]]; then
             echo "environment=stg" >> $GITHUB_OUTPUT
             echo "image_prefix=staging" >> $GITHUB_OUTPUT
-            echo "pr_emoji=" >> $GITHUB_OUTPUT
             echo "pr_body_prefix=Release IS-B2C staging" >> $GITHUB_OUTPUT
             echo "env_display_name=STAGING" >> $GITHUB_OUTPUT
           elif [[ "${{ github.event.inputs.test_branch }}" == "qa" ]]; then
             echo "environment=qa" >> $GITHUB_OUTPUT
             echo "image_prefix=qa" >> $GITHUB_OUTPUT
-            echo "pr_emoji=" >> $GITHUB_OUTPUT
             echo "pr_body_prefix=Release IS-B2C qa" >> $GITHUB_OUTPUT
             echo "env_display_name=QA" >> $GITHUB_OUTPUT
           fi
+          
           
       - name: Echo environment variables
         run: |
