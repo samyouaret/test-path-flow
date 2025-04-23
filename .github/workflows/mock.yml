@@ -4,15 +4,12 @@ on:
     branches:
       - main
     paths:
-      - 'environments/**/lmd-odoo-integration-service/deploy.yaml'
-      - 'environments/**/lmd-odoo-integration-service/deploy.yml'
+      - 'environments/pr/lmd-odoo-integration-service/deploy.yaml'
   pull_request:
     branches: [main]
     paths:
-      - 'environments/**/lmd-odoo-integration-service/deploy.yaml'
-      - 'environments/**/lmd-odoo-integration-service/deploy.yml'
-    paths-ignore:
-      - 'environments/prd'
+      - 'environments/stg/lmd-odoo-integration-service/deploy.yaml'
+      - 'environments/qa/lmd-odoo-integration-service/deploy.yml'
 jobs:
   extract-context:
     runs-on: ubuntu-latest
