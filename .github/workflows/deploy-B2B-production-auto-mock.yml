@@ -1,0 +1,62 @@
+name: deploy-B2B-production-auto-mock
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write # Required to comment with the plan output on PRs
+jobs:
+  deploy_job:
+    name: "Mock Deploys B2B in Production"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: environments/stg/lmd-odoo-integration-service
+    environment: 'prd'
+    env:
+      GCP_PROJECT: ysr-lmd-odoo-prd
+    steps:
+      - uses: actions/checkout@v4 # checkout must be the first step
+      
+      - name: Mock Approve Pull Request
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "MOCK: Would approve pull request #${{ github.event.pull_request.number }}"
+          echo "MOCK: Command that would run: gh pr review ${{ github.event.pull_request.number }} --approve"
+      
+      - name: Mock Auto Merge Pull Request
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "MOCK: Would merge pull request #${{ github.event.pull_request.number }} with squash"
+          echo "MOCK: Command that would run: gh pr merge ${{ github.event.pull_request.number }} --squash --repo ${{ github.repository }}"
+      
+      - id: "auth"
+        name: Mock Authentication
+        run: |
+          echo "MOCK: Would authenticate with Google Cloud"
+          echo "MOCK: Using workload identity provider and service account"
+      
+      - name: Mock Set up Cloud SDK
+        run: |
+          echo "MOCK: Would set up Google Cloud SDK"
+          echo "MOCK: Would install kubectl component"
+      
+      - name: Mock Authenticate kubectl
+        if: ${{ (vars.CLUSTER_NAME != '') }}
+        run: |
+          echo "MOCK: Would authenticate kubectl to cluster ${{ vars.CLUSTER_NAME }}"
+          echo "MOCK: Command that would run: gcloud container clusters get-credentials ${{ vars.CLUSTER_NAME }} --zone europe-west1-d --project ysr-lmd-odoo-prd"
+      
+      - name: Mock skaffolding
+        run: |
+          echo "MOCK: Would download and install skaffold"
+          echo "MOCK: Would run: skaffold deploy"
+          echo "MOCK: Deployment to production would happen here"
+      
+      - name: Mock Set up Cloud SDK Again
+        run: |
+          echo "MOCK: Would set up Google Cloud SDK again"
+          echo "MOCK: Would use version >= 415.0.0"
