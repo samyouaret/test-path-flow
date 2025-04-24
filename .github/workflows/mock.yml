@@ -9,8 +9,8 @@ on:
   pull_request:
     branches: [main, staging, qa]
     paths:
-      - 'environments/stg/lmd-odoo-integration-service/'
-      - 'environments/qa/lmd-odoo-integration-service/'
+      - 'environments/stg/lmd-odoo-integration-service'
+      - 'environments/qa/lmd-odoo-integration-service'
 
 jobs:
   extract-context:
