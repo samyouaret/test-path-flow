@@ -26,6 +26,7 @@ jobs:
       pr_body_prefix: ${{ steps.set-env.outputs.pr_body_prefix }}
       env_display_name: ${{ steps.set-env.outputs.env_display_name }}
     steps:
+      #  this is needed since some of vars names are not consistent with the env names like image_prefix for staging
       - name: Set environment variables based on branch
         id: set-env
         run: |
@@ -33,7 +34,7 @@ jobs:
           if [[ "${{ github.event.inputs.test_branch }}" == "main" ]]; then
             echo "environment=prd" >> $GITHUB_OUTPUT
             echo "image_prefix=prd" >> $GITHUB_OUTPUT
-            echo "pr_body_prefix=Release IS-B2C staging" >> $GITHUB_OUTPUT
+            echo "pr_body_prefix=Release IS-B2C production" >> $GITHUB_OUTPUT
             echo "env_display_name=PRODUCTION" >> $GITHUB_OUTPUT
           elif [[ "${{ github.event.inputs.test_branch }}" == "staging" ]]; then
             echo "environment=stg" >> $GITHUB_OUTPUT
@@ -43,7 +44,7 @@ jobs:
           elif [[ "${{ github.event.inputs.test_branch }}" == "qa" ]]; then
             echo "environment=qa" >> $GITHUB_OUTPUT
             echo "image_prefix=qa" >> $GITHUB_OUTPUT
-            echo "pr_body_prefix=Release IS-B2C qa" >> $GITHUB_OUTPUT
+            echo "pr_body_prefix=Release IS-B2C QA" >> $GITHUB_OUTPUT
             echo "env_display_name=QA" >> $GITHUB_OUTPUT
           fi
           

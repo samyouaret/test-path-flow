@@ -7,7 +7,8 @@ on:
       - 'environments/prd/lmd-odoo-integration-service/**'
 
   pull_request:
-    branches: [main]
+    branches:
+      - main
     paths:
       - 'environments/stg/lmd-odoo-integration-service/**'
       - 'environments/qa/lmd-odoo-integration-service/**'
