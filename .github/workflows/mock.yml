@@ -33,7 +33,7 @@ jobs:
         id: changed-files
         run: |
           git fetch origin ${{ github.base_ref }}
-          CHANGED_FILES=$(git diff --name-only origin/main ${{ github.sha }} | grep -E "environments/.*/lmd-odoo-integration-service/.*\.ya?ml")
+            CHANGED_FILES=$(git diff --name-only origin/main ${{ github.sha }} | grep -E "^environments/.+/lmd-odoo-integration-service/")
           echo "Changed files: $CHANGED_FILES"
           FIRST_FILE=$(echo "$CHANGED_FILES" | head -n 1)
           echo "Working only on First file: $FIRST_FILE"
