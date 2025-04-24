@@ -4,14 +4,17 @@ on:
     branches:
       - main
     paths:
-      - 'environments/prd/lmd-odoo-integration-service'
+      - 'environments/**/lmd-odoo-integration-service'
 
   pull_request:
-    branches: [main]
+    branches: [main, staging, qa]
     paths:
-      - 'environments/stg/lmd-odoo-integration-service/'
-      - 'environments/qa/lmd-odoo-integration-service/'
-
+      - 'environments/stg/lmd-odoo-integration-service/**'
+      - 'environments/qa/lmd-odoo-integration-service/**'
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write # Required to comment with the plan output on PRs
 jobs:
   extract-context:
     runs-on: ubuntu-latest
@@ -69,11 +72,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         
-      - name: Mock Approve Pull Request
+      - name: Approve Pull Request
         if: github.event_name == 'pull_request'
+        # really approve the PR
         run: |
           echo "Would approve PR ${{ github.event.pull_request.number }}"
-          
+          # gh pr review ${{ github.event.pull_request.number }} --approve --body "Approved by GitHub Actions"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # really merge the PR
+      - name: Merge Pull Request
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Would merge PR ${{ github.event.pull_request.number }}"
+          gh pr merge ${{ github.event.pull_request.number }} --merge --body "Merged by GitHub Actions"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Mock Auth
         run: |
           echo "Would authenticate with:"
