@@ -4,3 +4,4 @@ name: Test
 type: integration Service production
 description: |
   This is a test environment for the LMD Odoo Integration Service.
+  It is used to test the deployment of the service in a production-like environment.
