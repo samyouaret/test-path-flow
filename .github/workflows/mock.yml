@@ -32,7 +32,13 @@ jobs:
       - name: Detect changed files
         id: changed-files
         run: |
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E "^environments/.+/lmd-odoo-integration-service/")
+          # Set the right reference based on event type
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            BASE_REF="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE_REF="${{ github.event.before }}"
+          fi
+          CHANGED_FILES=$(git diff --name-only $BASE_REF ${{ github.sha }} | grep -E "^environments/.+/lmd-odoo-integration-service/")
           echo "Changed files: $CHANGED_FILES"
           # Extract all environments from changed files
           ENVS=$(echo "$CHANGED_FILES" | grep -o -E "environments/(prd|stg|qa)/" | sort | uniq | wc -l)
