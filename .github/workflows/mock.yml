@@ -75,13 +75,16 @@ jobs:
         run: |
           echo "Would approve PR ${{ github.event.pull_request.number }}"
           gh pr review ${{ github.event.pull_request.number }} --approve --body "Approved by GitHub Actions"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       # really merge the PR
       - name: Merge Pull Request
         if: github.event_name == 'pull_request'
         run: |
           echo "Would merge PR ${{ github.event.pull_request.number }}"
           gh pr merge ${{ github.event.pull_request.number }} --merge --body "Merged by GitHub Actions"
-
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Mock Auth
         run: |
           echo "Would authenticate with:"
