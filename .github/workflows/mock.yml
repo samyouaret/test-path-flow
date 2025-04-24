@@ -32,7 +32,7 @@ jobs:
       - name: Detect changed files
         id: changed-files
         run: |
-          git fetch origin origin/main
+          git fetch origin main
             CHANGED_FILES=$(git diff --name-only origin/main ${{ github.sha }} | grep -E "^environments/.+/lmd-odoo-integration-service/")
           echo "Changed files: $CHANGED_FILES"
           # Extract all environments from changed files
