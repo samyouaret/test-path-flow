@@ -2,7 +2,7 @@ name: deploy-B2B-production-auto-mock
 on:
   push:
     branches:
-      - main
+      - test
 
 permissions:
   contents: write
