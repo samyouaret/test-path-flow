@@ -29,9 +29,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get changed files
+      - name: Detect changed files
         id: changed-files
-        # if both prd and stg are changed, we come from PR then we should fail
         run: |
           git fetch origin ${{ github.base_ref }}
             CHANGED_FILES=$(git diff --name-only origin/main ${{ github.sha }} | grep -E "^environments/.+/lmd-odoo-integration-service/")
@@ -43,21 +42,17 @@ jobs:
             exit 1
           fi
           FIRST_FILE=$(echo "$CHANGED_FILES" | head -n 1)
-          echo "Working only on First file: $FIRST_FILE"
           echo "file=$FIRST_FILE" >> $GITHUB_OUTPUT
-      - name: Print extracted VAvalues
-        run: |
-          echo "File used for reference: ${{ steps.changed-files.outputs.file }}"
-          echo "Working only on First file: ${{ steps.changed-files.outputs.file }}"
-          echo "Changed files: ${{ steps.changed-files.outputs.file }}"
-          echo "Working only on First file: ${{ steps.changed-files.outputs.file }}"
 
-      - name: Extract env from path
+      # This step extracts the environment variables from the changed file path
+      # and sets them as outputs for the next job.
+      # we rely on the fact that the file is always in environments/<env>/lmd-odoo-integration-service/
+      # and that the env is always the second directory in the path
+      - name: Extract environment variables based on the changed directory
         id: set-vars
         run: |
           FILE="${{ steps.changed-files.outputs.file }}"
           echo "File used for reference: $FILE"
-          
           # Extract environment from the path
           ENV=$(echo "$FILE" | cut -d'/' -f2)
           WORKING_DIR=$(dirname "$FILE")
@@ -68,6 +63,12 @@ jobs:
           echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
           echo "working_directory=$WORKING_DIR" >> $GITHUB_OUTPUT
           echo "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUT
+          # Print the extracted variables for debugging
+          echo "Extracted environment variables:"
+          echo "ENV: $ENV"
+          echo "WORKING_DIR: $WORKING_DIR"
+          echo "PROJECT_ID: $PROJECT_ID"
+          echo "SERVICE_ACCOUNT: $SERVICE_ACCOUNT"
 
   mock-deploy:
     needs: extract-context
