@@ -41,6 +41,7 @@ jobs:
           if [ $ENVS -gt 1 ]; then
             echo "Error: Changes spanning multiple environments detected ($ENVS). Please limit changes to one environment at a time."
             exit 1
+          fi
           FIRST_FILE=$(echo "$CHANGED_FILES" | head -n 1)
           echo "Working only on First file: $FIRST_FILE"
           echo "file=$FIRST_FILE" >> $GITHUB_OUTPUT
