@@ -45,7 +45,7 @@ jobs:
           echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
           echo "working_directory=$WORKING_DIR" >> $GITHUB_OUTPUT
           echo "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUT
-      - name: Print Values for this job
+      - name: Print Extracted Variables
         run: |
           echo "env: ${{ steps.set-vars.outputs.env }}"
           echo "project_id: ${{ steps.set-vars.outputs.project_id }}"

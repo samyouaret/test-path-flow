@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - 'environments/prd/lmd-odoo-integration-service'
+
   pull_request:
     branches: [main]
     paths:
@@ -34,7 +35,7 @@ jobs:
           FIRST_FILE=$(echo "$CHANGED_FILES" | head -n 1)
           echo "Working only on First file: $FIRST_FILE"
           echo "file=$FIRST_FILE" >> $GITHUB_OUTPUT
-      - name: Print Values
+      - name: Print extracted VAvalues
         run: |
           echo "File used for reference: ${{ steps.changed-files.outputs.file }}"
           echo "Working only on First file: ${{ steps.changed-files.outputs.file }}"

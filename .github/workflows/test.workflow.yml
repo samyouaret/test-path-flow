@@ -4,8 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       test_branch:
+        type: choice
         description: 'Branch to test (main, staging, qa)'
         required: true
+        options:
+          - main
+          - staging
+          - qa
         default: 'main'
     
 permissions:
@@ -64,12 +69,6 @@ jobs:
       - name: Echo environment
         run: |
          echo "Using environment: ${{ needs.determine_environment.outputs.environment }}"
-      - name: Echo sample secret
-        run: |
-         echo "Sample secret: ${{ secrets.SAMPLE_SECRET }}"
-      - name: ECHO SAMPLE VAR
-        run: |
-         echo "Sample var: ${{ vars.SAMPLE_VAR }}"
       - name: Echo image tag
         run: |
          echo "Image tag: ${{ env.MW_IMAGE_DOCKER_TAG }}"
