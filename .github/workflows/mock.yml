@@ -4,10 +4,10 @@ on:
     branches:
       - main
     paths:
-      - 'environments/prd/lmd-odoo-integration-service'
+      - 'environments/**/lmd-odoo-integration-service'
 
   pull_request:
-    branches: [main]
+    branches: [main, staging, qa]
     paths:
       - 'environments/stg/lmd-odoo-integration-service/'
       - 'environments/qa/lmd-odoo-integration-service/'
