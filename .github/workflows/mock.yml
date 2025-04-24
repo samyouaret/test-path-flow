@@ -74,15 +74,13 @@ jobs:
         # really approve the PR
         run: |
           echo "Would approve PR ${{ github.event.pull_request.number }}"
-          # Uncomment the following line to actually approve the PR
-          # gh pr review ${{ github.event.pull_request.number }} --approve --body "Approved by GitHub Actions"
+          gh pr review ${{ github.event.pull_request.number }} --approve --body "Approved by GitHub Actions"
       # really merge the PR
       - name: Merge Pull Request
         if: github.event_name == 'pull_request'
         run: |
           echo "Would merge PR ${{ github.event.pull_request.number }}"
-          # Uncomment the following line to actually merge the PR
-          # gh pr merge ${{ github.event.pull_request.number }} --merge --body "Merged by GitHub Actions"
+          gh pr merge ${{ github.event.pull_request.number }} --merge --body "Merged by GitHub Actions"
 
       - name: Mock Auth
         run: |
