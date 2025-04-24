@@ -11,7 +11,10 @@ on:
     paths:
       - 'environments/stg/lmd-odoo-integration-service/**'
       - 'environments/qa/lmd-odoo-integration-service/**'
-
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write # Required to comment with the plan output on PRs
 jobs:
   extract-context:
     runs-on: ubuntu-latest
