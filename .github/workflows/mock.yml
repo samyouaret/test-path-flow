@@ -9,8 +9,8 @@ on:
   pull_request:
     branches: [main, staging, qa]
     paths:
-      - 'environments/stg/lmd-odoo-integration-service'
-      - 'environments/qa/lmd-odoo-integration-service'
+      - 'environments/stg/lmd-odoo-integration-service/**'
+      - 'environments/qa/lmd-odoo-integration-service/**'
 
 jobs:
   extract-context:
@@ -73,7 +73,12 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           echo "Would approve PR ${{ github.event.pull_request.number }}"
-          
+
+      - name: Mock Merge Pull Request
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Would merge PR ${{ github.event.pull_request.number }}"
+
       - name: Mock Auth
         run: |
           echo "Would authenticate with:"
