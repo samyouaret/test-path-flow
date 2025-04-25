@@ -1,0 +1,25 @@
+{
+    "environments": {
+        "main": {
+            "environment": "prd",
+            "image_prefix": "prd",
+            "pr_emoji": ":rocket:",
+            "pr_body_prefix": "Release IS-B2C PRODUCTION",
+            "env_display_name": "PRODUCTION"
+        },
+        "staging": {
+            "environment": "stg",
+            "image_prefix": "staging",
+            "pr_emoji": ":rocket:",
+            "pr_body_prefix": "Release IS-B2C staging",
+            "env_display_name": "STAGING"
+        },
+        "qa": {
+            "environment": "qa",
+            "image_prefix": "qa",
+            "pr_emoji": ":rocket:",
+            "pr_body_prefix": "Release IS-B2C qa",
+            "env_display_name": "QA"
+        }
+    }
+}
