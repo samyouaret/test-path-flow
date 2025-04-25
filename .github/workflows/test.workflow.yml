@@ -116,4 +116,6 @@ jobs:
           echo "PR Emoji: ${{ needs.determine_environment.outputs.pr_emoji }}"
           echo "PR Body Prefix: ${{ needs.determine_environment.outputs.pr_body_prefix }}"
           echo "Environment Display Name: ${{ needs.determine_environment.outputs.env_display_name }}"
+          echo "Deployment File: environments/${{ needs.determine_environment.outputs.environment }}/lmd-odoo-integration-service/lmd-odoo-integration-service.${{ needs.determine_environment.outputs.environment }}.yaml"
+          echo "Repository name: ${{ needs.determine_environment.outputs.deploy_repo_name }}"
           echo "======================================================"
