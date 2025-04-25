@@ -27,16 +27,12 @@ jobs:
       env_display_name: ${{ steps.set-env.outputs.env_display_name }}
     steps:
       #  this is needed since some of vars names are not consistent with the env names like image_prefix for staging
+    - uses: actions/checkout@v4
     - name: Set environment variables from config
       id: set-env
       run: |
         BRANCH="${{ github.event.inputs.test_branch }}"
-        # print the current directory
-        echo "Current directory: $(pwd)"
-        # print files in the current directory
-        echo "Files in the current directory:"
-        ls -la
-        CONFIG=$(cat ./env-config.json)
+        CONFIG=$(cat ./deploy-config/env-config.json)
 
         # Use jq to extract environment settings
         if [[ $(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"]") != "null" ]]; then
