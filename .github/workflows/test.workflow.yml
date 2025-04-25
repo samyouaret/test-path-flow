@@ -32,7 +32,12 @@ jobs:
       id: set-env
       run: |
         BRANCH="${{ github.event.inputs.test_branch }}"
-        CONFIG=$(cat ./deploy-config/env-config.json)
+        # print working directory
+        echo "Current working directory: $(pwd)"
+        # print all files in the current directory
+        echo "Files in the current directory:"
+        ls -la
+        CONFIG=$(cat deploy-config/env-config.json)
 
         # Use jq to extract environment settings
         if [[ $(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"]") != "null" ]]; then
