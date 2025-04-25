@@ -55,6 +55,7 @@ jobs:
           echo "PR Emoji: ${{ steps.set-env.outputs.pr_emoji }}"
           echo "PR Body Prefix: ${{ steps.set-env.outputs.pr_body_prefix }}"
           echo "Environment Display Name: ${{ steps.set-env.outputs.env_display_name }}"
+          echo "Deploy Repo Name: ${{ steps.set-env.outputs.deploy_repo_name }}"
 
   build_integration_service:
     environment: ${{ needs.determine_environment.outputs.environment }}
