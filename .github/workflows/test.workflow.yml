@@ -39,7 +39,7 @@ jobs:
         if [[ $(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"]") != "null" ]]; then
           echo "environment=$(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"].env")" >> $GITHUB_OUTPUT
           echo "image_prefix=$(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"].image_prefix")" >> $GITHUB_OUTPUT
-          echo "deploy_repo_name=$(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"].deploy_repo_name")" >> $GITHUB_OUTPUT
+          echo "deploy_repo_name=$(echo "$CONFIG" | jq -r ".deploy_repo_name")" >> $GITHUB_OUTPUT
           echo "pr_emoji=$(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"].pr_emoji")" >> $GITHUB_OUTPUT
           echo "pr_body_prefix=$(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"].pr_body_prefix")" >> $GITHUB_OUTPUT
           echo "env_display_name=$(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"].env_display_name")" >> $GITHUB_OUTPUT
