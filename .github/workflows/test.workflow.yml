@@ -37,7 +37,7 @@ jobs:
         # print all files in the current directory
         echo "Files in the current directory:"
         ls -la
-        CONFIG=$(cat env-config.json)
+        CONFIG=$(cat deploy-config/env-config.json)
 
         # Use jq to extract environment settings
         if [[ $(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"]") != "null" ]]; then
