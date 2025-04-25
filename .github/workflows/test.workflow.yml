@@ -33,6 +33,9 @@ jobs:
         BRANCH="${{ github.event.inputs.test_branch }}"
         # print the current directory
         echo "Current directory: $(pwd)"
+        # print files in the current directory
+        echo "Files in the current directory:"
+        ls -la
         CONFIG=$(cat ./deploy-config/env-config.json)
 
         # Use jq to extract environment settings
