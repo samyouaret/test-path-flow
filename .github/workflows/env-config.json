@@ -1,21 +1,21 @@
 {
     "environments": {
         "main": {
-            "environment": "prd",
+            "env": "prd",
             "image_prefix": "prd",
             "pr_emoji": ":rocket:",
             "pr_body_prefix": "Release IS-B2C PRODUCTION",
             "env_display_name": "PRODUCTION"
         },
         "staging": {
-            "environment": "stg",
+            "env": "stg",
             "image_prefix": "staging",
             "pr_emoji": ":rocket:",
             "pr_body_prefix": "Release IS-B2C staging",
             "env_display_name": "STAGING"
         },
         "qa": {
-            "environment": "qa",
+            "env": "qa",
             "image_prefix": "qa",
             "pr_emoji": ":rocket:",
             "pr_body_prefix": "Release IS-B2C qa",
