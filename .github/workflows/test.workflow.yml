@@ -25,6 +25,7 @@ jobs:
       pr_emoji: ${{ steps.set-env.outputs.pr_emoji }}
       pr_body_prefix: ${{ steps.set-env.outputs.pr_body_prefix }}
       env_display_name: ${{ steps.set-env.outputs.env_display_name }}
+      deploy_repo_name: ${{ steps.set-env.outputs.deploy_repo_name }}
     steps:
     # This is needed since some of vars names are not consistent with the env names like image_prefix for staging
     # using deploy-config/env-config.json file to set environment variables allows for easy modification and addition of new environments
@@ -38,6 +39,7 @@ jobs:
         if [[ $(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"]") != "null" ]]; then
           echo "environment=$(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"].env")" >> $GITHUB_OUTPUT
           echo "image_prefix=$(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"].image_prefix")" >> $GITHUB_OUTPUT
+          echo "deploy_repo_name=$(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"].deploy_repo_name")" >> $GITHUB_OUTPUT
           echo "pr_emoji=$(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"].pr_emoji")" >> $GITHUB_OUTPUT
           echo "pr_body_prefix=$(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"].pr_body_prefix")" >> $GITHUB_OUTPUT
           echo "env_display_name=$(echo "$CONFIG" | jq -r ".environments[\"$BRANCH\"].env_display_name")" >> $GITHUB_OUTPUT
@@ -101,7 +103,7 @@ jobs:
         run: |
           echo "Would create PR with:"
           echo "  Title: [B2C ${{ needs.determine_environment.outputs.env_display_name }}] - Test PR Title ${{ needs.determine_environment.outputs.pr_emoji }}"
-          echo "  Body: ${{ needs.determine_environment.outputs.pr_body_prefix }} https://github.com/YAtechnologies/pi-lmd-odoo-ship/commits/${{ github.sha }}"
+          echo "  Body: ${{ needs.determine_environment.outputs.pr_body_prefix }} https://github.com/${{needs.determine_environment.outputs.deploy_repo_name}}/commits/${{ github.sha }}"
           
       - name: Summary of all values
         run: |

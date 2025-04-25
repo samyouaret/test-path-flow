@@ -1,4 +1,5 @@
 {
+    "deploy_repo_name":"YAtechnologies/pi-lmd-odoo-ship",
     "environments": {
         "main": {
             "env": "prd",
