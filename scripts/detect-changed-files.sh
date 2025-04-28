@@ -7,6 +7,9 @@ else
   BASE_REF="$BEFORE_SHA"
 fi
 
+echo "Base reference: $BASE_REF"
+echo "Current Head reference: $GITHUB_SHA"
+
 CHANGED_FILES=$(git diff --name-only $BASE_REF $GITHUB_SHA | grep -E "^environments/.+/lmd-odoo-integration-service/")
 echo "Changed files: $CHANGED_FILES"
 
