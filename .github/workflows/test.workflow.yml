@@ -84,7 +84,7 @@ jobs:
     needs: [determine_environment, build_integration_service]
     steps:
       - name: Echo repository checkout
-        run: echo "Would checkout YAtechnologies/pi-lmd-odoo-ship repository"
+        run: echo "Would checkout ${{needs.determine_environment.outputs.deploy_repo_name}} repository"
 
       - name: Echo deployment file update
         run: |

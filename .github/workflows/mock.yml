@@ -4,13 +4,27 @@ on:
     branches:
       - main
     paths:
+<<<<<<< Updated upstream
       - 'environments/prd/lmd-odoo-integration-service'
+=======
+      - "environments/prd/lmd-odoo-integration-service/**"
+
+>>>>>>> Stashed changes
   pull_request:
     branches: [main]
     paths:
+<<<<<<< Updated upstream
       - 'environments/stg/lmd-odoo-integration-service/'
       - 'environments/qa/lmd-odoo-integration-service/'
 
+=======
+      - "environments/stg/lmd-odoo-integration-service/**"
+      - "environments/qa/lmd-odoo-integration-service/**"
+permissions:
+  contents: write
+  id-token: write
+  pull-requests: write # Required to comment with the plan output on PRs
+>>>>>>> Stashed changes
 jobs:
   extract-context:
     runs-on: ubuntu-latest
@@ -28,6 +42,7 @@ jobs:
       - name: Get changed files
         id: changed-files
         run: |
+<<<<<<< Updated upstream
           git fetch origin ${{ github.base_ref }}
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} ${{ github.sha }} | grep -E "environments/.*/lmd-odoo-integration-service/deploy\.ya?ml")
           echo "Changed files: $CHANGED_FILES"
@@ -57,6 +72,20 @@ jobs:
           echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
           echo "working_directory=$WORKING_DIR" >> $GITHUB_OUTPUT
           echo "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUT
+=======
+          BASE_REF="${{ github.event.pull_request.base.sha || github.event.before }}"
+          ./scripts/detect-changed-files.sh "$BASE_REF" "${{ github.sha }}" "environments/.+/lmd-odoo-integration-service/"
+        env:
+          GITHUB_OUTPUT: $GITHUB_OUTPUT
+
+      - name: Extract environment variables based on the changed directory
+        id: set-vars
+        run: |
+          FILE="${{ steps.changed-files.outputs.file }}"
+          ./scripts/extract-env-vars.sh "$FILE"
+        env:
+          GITHUB_OUTPUT: $GITHUB_OUTPUT
+>>>>>>> Stashed changes
 
   mock-deploy:
     needs: extract-context
@@ -67,8 +96,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+<<<<<<< Updated upstream
         
       - name: Mock Approve Pull Request
+=======
+
+      - name: Approve Pull Request
+>>>>>>> Stashed changes
         if: github.event_name == 'pull_request'
         run: |
           echo "Would approve PR ${{ github.event.pull_request.number }}"
@@ -78,7 +112,7 @@ jobs:
           echo "Would authenticate with:"
           echo "Project ID: ${{ needs.extract-context.outputs.project_id }}"
           echo "Service Account: ${{ needs.extract-context.outputs.service_account }}"
-          
+
       - name: Mock Kubectl Authentication
         run: |
           echo "Would run: gcloud container clusters get-credentials [CLUSTER_NAME] --zone europe-west1-d --project ${{ needs.extract-context.outputs.project_id }}"
