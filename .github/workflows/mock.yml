@@ -4,14 +4,14 @@ on:
     branches:
       - main
     paths:
-      - "environments/prd/lmd-odoo-integration-service/**"
+      - 'environments/prd/lmd-odoo-integration-service/**'
 
   pull_request:
     branches:
       - main
     paths:
-      - "environments/stg/lmd-odoo-integration-service/**"
-      - "environments/qa/lmd-odoo-integration-service/**"
+      - 'environments/stg/lmd-odoo-integration-service/**'
+      - 'environments/qa/lmd-odoo-integration-service/**'
 permissions:
   contents: write
   id-token: write
@@ -33,20 +33,20 @@ jobs:
       - name: Detect changed files
         id: changed-files
         run: |
-          BASE_REF="${{ github.event.pull_request.base.sha || github.event.before }}"
-          / add exec permissions to the script
-          chmod +x ./scripts/detect-changed-files.sh
-          ./scripts/detect-changed-files.sh "$BASE_REF" "${{ github.sha }}" "environments/.+/lmd-odoo-integration-service/"
+          chmod +x ./scripts/extract-changed-files.sh
+          ./scripts/extract-changed-files.sh
         env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BEFORE_SHA: ${{ github.event.before }}
+          GITHUB_SHA: ${{ github.sha }}
           GITHUB_OUTPUT: $GITHUB_OUTPUT
 
       - name: Extract environment variables based on the changed directory
         id: set-vars
         run: |
-          FILE="${{ steps.changed-files.outputs.file }}"
-          # add exec permissions to the script
-          chmod +x ./scripts/extract-env-vars.sh
-          ./scripts/extract-env-vars.sh "$FILE"
+          chmod +x ./scripts/extract-environment-vars.sh
+          ./scripts/extract-environment-vars.sh "${{ steps.changed-files.outputs.file }}"
         env:
           GITHUB_OUTPUT: $GITHUB_OUTPUT
 
@@ -59,16 +59,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
+        
       - name: Approve Pull Request
         if: github.event_name == 'pull_request'
-        # really approve the PR
         run: |
           echo "Would approve PR ${{ github.event.pull_request.number }}"
           # gh pr review ${{ github.event.pull_request.number }} --approve --body "Approved by GitHub Actions"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # really merge the PR
+
       - name: Merge Pull Request
         if: github.event_name == 'pull_request'
         run: |
@@ -76,15 +75,17 @@ jobs:
           gh pr merge ${{ github.event.pull_request.number }} --merge --body "Merged by GitHub Actions"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Mock Auth
         run: |
           echo "Would authenticate with:"
           echo "Project ID: ${{ needs.extract-context.outputs.project_id }}"
           echo "Service Account: ${{ needs.extract-context.outputs.service_account }}"
-
+          
       - name: Mock Kubectl Authentication
         run: |
           echo "Would run: gcloud container clusters get-credentials [CLUSTER_NAME] --zone europe-west1-d --project ${{ needs.extract-context.outputs.project_id }}"
+
       - name: Mock Skaffold Deploy
         run: |
           echo "Would run skaffold deploy in directory: $(pwd)"

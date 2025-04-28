@@ -1,7 +1,7 @@
 #!/bin/bash
 
-FILE=$1
-
+# Get the file from input
+FILE="$1"
 echo "File used for reference: $FILE"
 
 # Extract environment from the path
@@ -10,10 +10,10 @@ WORKING_DIR=$(dirname "$FILE")
 PROJECT_ID="ysr-lmd-odoo-$ENV"
 SERVICE_ACCOUNT="${PROJECT_ID}-sa@${PROJECT_ID}.iam.gserviceaccount.com"
 
-echo "env=$ENV" >> "$GITHUB_OUTPUT"
-echo "project_id=$PROJECT_ID" >> "$GITHUB_OUTPUT"
-echo "working_directory=$WORKING_DIR" >> "$GITHUB_OUTPUT"
-echo "service_account=$SERVICE_ACCOUNT" >> "$GITHUB_OUTPUT"
+echo "env=$ENV" >> $GITHUB_OUTPUT
+echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
+echo "working_directory=$WORKING_DIR" >> $GITHUB_OUTPUT
+echo "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUT
 
 # Print the extracted variables for debugging
 echo "Extracted environment variables:"
