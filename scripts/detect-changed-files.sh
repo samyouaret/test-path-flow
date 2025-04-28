@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#  echo github env vars
+echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
+echo "GITHUB_SHA: $GITHUB_SHA"
+echo "GITHUB_REF: $GITHUB_REF"
 # Set the right reference based on event type
 if [ "$GITHUB_EVENT_NAME" == "pull_request" ]; then
   BASE_REF="$PR_BASE_SHA"
