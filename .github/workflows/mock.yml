@@ -34,6 +34,8 @@ jobs:
         id: changed-files
         run: |
           BASE_REF="${{ github.event.pull_request.base.sha || github.event.before }}"
+          / add exec permissions to the script
+          chmod +x ./scripts/detect-changed-files.sh
           ./scripts/detect-changed-files.sh "$BASE_REF" "${{ github.sha }}" "environments/.+/lmd-odoo-integration-service/"
         env:
           GITHUB_OUTPUT: $GITHUB_OUTPUT
@@ -42,6 +44,8 @@ jobs:
         id: set-vars
         run: |
           FILE="${{ steps.changed-files.outputs.file }}"
+          # add exec permissions to the script
+          chmod +x ./scripts/extract-env-vars.sh
           ./scripts/extract-env-vars.sh "$FILE"
         env:
           GITHUB_OUTPUT: $GITHUB_OUTPUT
