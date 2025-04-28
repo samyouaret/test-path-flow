@@ -33,8 +33,8 @@ jobs:
       - name: Detect changed files
         id: changed-files
         run: |
-          chmod +x ./scripts/extract-changed-files.sh
-          ./scripts/extract-changed-files.sh
+          chmod +x ./scripts/detect-changed-files.sh
+          ./scripts/detect-changed-files.sh
         env:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -45,8 +45,8 @@ jobs:
       - name: Extract environment variables based on the changed directory
         id: set-vars
         run: |
-          chmod +x ./scripts/extract-environment-vars.sh
-          ./scripts/extract-environment-vars.sh "${{ steps.changed-files.outputs.file }}"
+          chmod +x ./scripts/extract-env-vars.sh
+          ./scripts/extract-env-vars.sh "${{ steps.changed-files.outputs.file }}"
         env:
           GITHUB_OUTPUT: $GITHUB_OUTPUT
 
