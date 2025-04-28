@@ -35,6 +35,13 @@ jobs:
         run: |
           chmod +x ./scripts/detect-changed-files.sh
           ./scripts/detect-changed-files.sh
+          # echo github event used in env for debugging
+          echo "event used in env:"
+          echo "GITHUB_EVENT_NAME: ${{ github.event_name }}"
+          echo "PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}"
+          echo "BEFORE_SHA: ${{ github.event.before }}"
+          echo "GITHUB_SHA: ${{ github.sha }}"
+          echo "GITHUB_OUTPUT: $GITHUB_OUTPUT"
         env:
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
