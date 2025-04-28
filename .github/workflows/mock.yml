@@ -4,14 +4,14 @@ on:
     branches:
       - main
     paths:
-      - 'environments/prd/lmd-odoo-integration-service/**'
+      - "environments/prd/lmd-odoo-integration-service/**"
 
   pull_request:
     branches:
       - main
     paths:
-      - 'environments/stg/lmd-odoo-integration-service/**'
-      - 'environments/qa/lmd-odoo-integration-service/**'
+      - "environments/stg/lmd-odoo-integration-service/**"
+      - "environments/qa/lmd-odoo-integration-service/**"
 permissions:
   contents: write
   id-token: write
@@ -33,48 +33,18 @@ jobs:
       - name: Detect changed files
         id: changed-files
         run: |
-          # Set the right reference based on event type
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            BASE_REF="${{ github.event.pull_request.base.sha }}"
-          else
-            BASE_REF="${{ github.event.before }}"
-          fi
-          CHANGED_FILES=$(git diff --name-only $BASE_REF ${{ github.sha }} | grep -E "^environments/.+/lmd-odoo-integration-service/")
-          echo "Changed files: $CHANGED_FILES"
-          # Extract all environments from changed files
-          ENVS=$(echo "$CHANGED_FILES" | grep -o -E "environments/(prd|stg|qa)/" | sort | uniq | wc -l)
-          if [ $ENVS -gt 1 ]; then
-            echo "Error: Changes spanning multiple environments detected ($ENVS). Please limit changes to one environment at a time."
-            exit 1
-          fi
-          FIRST_FILE=$(echo "$CHANGED_FILES" | head -n 1)
-          echo "file=$FIRST_FILE" >> $GITHUB_OUTPUT
+          BASE_REF="${{ github.event.pull_request.base.sha || github.event.before }}"
+          ./scripts/detect-changed-files.sh "$BASE_REF" "${{ github.sha }}" "environments/.+/lmd-odoo-integration-service/"
+        env:
+          GITHUB_OUTPUT: $GITHUB_OUTPUT
 
-      # This step extracts the environment variables from the changed file path
-      # and sets them as outputs for the next job.
-      # we rely on the fact that the file is always in environments/<env>/lmd-odoo-integration-service/
-      # and that the env is always the second directory in the path
       - name: Extract environment variables based on the changed directory
         id: set-vars
         run: |
           FILE="${{ steps.changed-files.outputs.file }}"
-          echo "File used for reference: $FILE"
-          # Extract environment from the path
-          ENV=$(echo "$FILE" | cut -d'/' -f2)
-          WORKING_DIR=$(dirname "$FILE")
-          PROJECT_ID="ysr-lmd-odoo-$ENV"
-          SERVICE_ACCOUNT="${PROJECT_ID}-sa@${PROJECT_ID}.iam.gserviceaccount.com"
-          
-          echo "env=$ENV" >> $GITHUB_OUTPUT
-          echo "project_id=$PROJECT_ID" >> $GITHUB_OUTPUT
-          echo "working_directory=$WORKING_DIR" >> $GITHUB_OUTPUT
-          echo "service_account=$SERVICE_ACCOUNT" >> $GITHUB_OUTPUT
-          # Print the extracted variables for debugging
-          echo "Extracted environment variables:"
-          echo "ENV: $ENV"
-          echo "WORKING_DIR: $WORKING_DIR"
-          echo "PROJECT_ID: $PROJECT_ID"
-          echo "SERVICE_ACCOUNT: $SERVICE_ACCOUNT"
+          ./scripts/extract-env-vars.sh "$FILE"
+        env:
+          GITHUB_OUTPUT: $GITHUB_OUTPUT
 
   mock-deploy:
     needs: extract-context
@@ -85,7 +55,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        
+
       - name: Approve Pull Request
         if: github.event_name == 'pull_request'
         # really approve the PR
@@ -107,7 +77,7 @@ jobs:
           echo "Would authenticate with:"
           echo "Project ID: ${{ needs.extract-context.outputs.project_id }}"
           echo "Service Account: ${{ needs.extract-context.outputs.service_account }}"
-          
+
       - name: Mock Kubectl Authentication
         run: |
           echo "Would run: gcloud container clusters get-credentials [CLUSTER_NAME] --zone europe-west1-d --project ${{ needs.extract-context.outputs.project_id }}"
