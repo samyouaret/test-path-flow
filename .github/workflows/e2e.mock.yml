@@ -1,0 +1,141 @@
+# This is a mock workflow for testing the sed command without side effects
+name: Test-Odoo-Integration-Service-Update
+
+on:
+  workflow_dispatch:  # Manual trigger for testing
+
+jobs:
+  determine_environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: "stg"  # Hardcoded for testing
+      image_prefix: "staging"  # Hardcoded for testing
+      env_display_name: "Staging"  # Hardcoded for testing
+      deploy_repo_name: "${{ github.repository }}"  # Use current repo
+    steps:
+      - name: Print mock environment variables
+        run: |
+          echo "Environment: stg"
+          echo "Image Prefix: staging"
+          echo "Environment Display Name: Staging"
+          echo "Deploy Repo Name: ${{ github.repository }}"
+
+  build_integration_service:
+    runs-on: ubuntu-latest
+    needs: determine_environment
+    outputs:
+      odoo_is_image_tag: "staging-v123456789abcdef"  # Mock image tag for testing
+    steps:
+      - name: Mock build step
+        run: |
+          echo "Mock build completed with tag: staging-v123456789abcdef"
+
+  test_deployment_update:
+    name: 'Test Deployment File Update'
+    runs-on: ubuntu-latest
+    needs: [determine_environment, build_integration_service]
+    steps:
+      # Checkout current repository
+      - uses: actions/checkout@v4
+
+      # Create test directories and files
+      - name: Setup test environment
+        run: |
+          mkdir -p environments/${{ needs.determine_environment.outputs.environment }}/lmd-odoo-integration-service
+          
+          # Create a test deployment file with both potential formats for testing
+          # Format 1: With PROJECT_ID
+          echo "apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: lmd-odoo-integration-service
+          spec:
+            template:
+              spec:
+                containers:
+                - name: lmd-odoo-integration-service
+                  image: europe-west1-docker.pkg.dev/ysr-project-id/ysr-lmd-odoo-stg-gcr/odoo-integration-svc:staging-v448d122159be6e7543cd23b1cc02c4c2d473f3ab
+          ---
+          # Format 2: With environment name directly in path  
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: lmd-odoo-integration-service-alt
+          spec:
+            template:
+              spec:
+                containers:
+                - name: lmd-odoo-integration-service-alt
+                  image: europe-west1-docker.pkg.dev/ysr-lmd-odoo-stg/ysr-lmd-odoo-stg-gcr/odoo-integration-svc:staging-vabcdef123456789" > environments/${{ needs.determine_environment.outputs.environment }}/lmd-odoo-integration-service/lmd-odoo-integration-service.${{ needs.determine_environment.outputs.environment }}.yaml
+          
+          echo "Test environment setup complete."
+          cat environments/${{ needs.determine_environment.outputs.environment }}/lmd-odoo-integration-service/lmd-odoo-integration-service.${{ needs.determine_environment.outputs.environment }}.yaml
+
+      # Test update deployment file logic with echo
+      - name: Test Update deployment file
+        run: |
+          DEPLOYMENT_FILE="environments/${{ needs.determine_environment.outputs.environment }}/lmd-odoo-integration-service/lmd-odoo-integration-service.${{ needs.determine_environment.outputs.environment }}.yaml"
+          
+          echo "==== STARTING TEST OF DEPLOYMENT FILE UPDATE ===="
+          echo "Contents of deployment file before changes:"
+          cat "$DEPLOYMENT_FILE"
+          echo ""
+          
+          echo "Looking for image lines containing 'odoo-integration-svc:'"
+          grep "odoo-integration-svc:" "$DEPLOYMENT_FILE"
+          echo ""
+          
+          # Create a backup of the file
+          cp "$DEPLOYMENT_FILE" "${DEPLOYMENT_FILE}.bak"
+          
+          echo "MOCK: Would execute first sed command (with PROJECT_ID):"
+          echo "sed -i \"s|image: europe-west1-docker.pkg.dev/ysr-project-id/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}-gcr/odoo-integration-svc:${{ needs.determine_environment.outputs.image_prefix }}-[^ ]*|image: europe-west1-docker.pkg.dev/ysr-project-id/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}-gcr/odoo-integration-svc:${{ needs.build_integration_service.outputs.odoo_is_image_tag }}|\" \"$DEPLOYMENT_FILE\""
+          
+          # Actually run the command for testing
+          sed -i "s|image: europe-west1-docker.pkg.dev/ysr-project-id/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}-gcr/odoo-integration-svc:${{ needs.determine_environment.outputs.image_prefix }}-[^ ]*|image: europe-west1-docker.pkg.dev/ysr-project-id/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}-gcr/odoo-integration-svc:${{ needs.build_integration_service.outputs.odoo_is_image_tag }}|" "$DEPLOYMENT_FILE"
+          
+          # Check if changes were made
+          echo "Checking if first sed command made changes:"
+          if diff -q "$DEPLOYMENT_FILE" "${DEPLOYMENT_FILE}.bak" >/dev/null; then
+            echo "First attempt made no changes. Will try second approach."
+            cp "${DEPLOYMENT_FILE}.bak" "$DEPLOYMENT_FILE"  # Restore from backup
+            
+            echo "MOCK: Would execute second sed command (with environment name in path):"
+            echo "sed -i \"s|image: europe-west1-docker.pkg.dev/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}-gcr/odoo-integration-svc:[^ ]*|image: europe-west1-docker.pkg.dev/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}-gcr/odoo-integration-svc:${{ needs.build_integration_service.outputs.odoo_is_image_tag }}|\" \"$DEPLOYMENT_FILE\""
+            
+            # Actually run the command for testing
+            sed -i "s|image: europe-west1-docker.pkg.dev/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}-gcr/odoo-integration-svc:[^ ]*|image: europe-west1-docker.pkg.dev/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}/ysr-lmd-odoo-${{ needs.determine_environment.outputs.environment }}-gcr/odoo-integration-svc:${{ needs.build_integration_service.outputs.odoo_is_image_tag }}|" "$DEPLOYMENT_FILE"
+            
+            # Check if second attempt made changes
+            if diff -q "$DEPLOYMENT_FILE" "${DEPLOYMENT_FILE}.bak" >/dev/null; then
+              echo "Second attempt also made no changes. Will try generic approach."
+              cp "${DEPLOYMENT_FILE}.bak" "$DEPLOYMENT_FILE"  # Restore from backup
+              
+              echo "MOCK: Would execute third sed command (generic approach):"
+              echo "sed -i \"/odoo-integration-svc:/s|:[^ ]*|:${{ needs.build_integration_service.outputs.odoo_is_image_tag }}|\" \"$DEPLOYMENT_FILE\""
+              
+              # Actually run the command for testing
+              sed -i "/odoo-integration-svc:/s|:[^ ]*|:${{ needs.build_integration_service.outputs.odoo_is_image_tag }}|" "$DEPLOYMENT_FILE"
+            fi
+          fi
+          
+          # Final verification
+          if diff -q "$DEPLOYMENT_FILE" "${DEPLOYMENT_FILE}.bak" >/dev/null; then
+            echo "ERROR: All attempts to update the image tag failed."
+            echo "Original deployment file content:"
+            cat "${DEPLOYMENT_FILE}.bak"
+          else
+            echo "✅ Deployment file update completed successfully."
+            echo "Changes made:"
+            diff "${DEPLOYMENT_FILE}.bak" "$DEPLOYMENT_FILE"
+          fi
+          
+          # Show final result
+          echo "Final deployment file content:"
+          cat "$DEPLOYMENT_FILE"
+
+      # Test git commit with echo only, no actual commit
+      - name: Mock Git Commit
+        run: |
+          echo "MOCK: Would commit changes to branch deploy-${{ github.sha }}"
+          echo "MOCK: Would create PR with title '[B2C ${{ needs.determine_environment.outputs.env_display_name }}] - Test PR 🚀'"
